@@ -1,0 +1,30 @@
+# Datasets, checkpoints, caches — never belong in this repo
+*.pkl
+*.ckpt
+*.pt
+*.pth
+*.npz
+*.npy
+checkpoints/
+data/
+__pycache__/
+*.pyc
+
+# Raw experiment outputs (meshes, logs, large figure sheets) stay on the working VM
+outputs/
+outputs1/
+outputs_full/
+logs/
+*.glb
+*.obj
+*.mtl
+
+# Credentials / environment
+.env
+*.token
+.netrc
+
+# OS / editor cruft
+.DS_Store
+.ipynb_checkpoints/
+*.swp
