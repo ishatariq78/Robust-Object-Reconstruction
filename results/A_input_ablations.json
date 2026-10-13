@@ -1,0 +1,37 @@
+{
+  "description": "Mean Chamfer distance and F-score (2% tolerance) over the full 178-object ShapeR test set, one condition at a time, all else held at the dataset default.",
+  "n_objects": 178,
+  "source_run": "outputs_full/ (full-set run); outputs1/ holds an earlier quick-subset run, superseded here",
+  "A1_pointcloud_density_and_noise": {
+    "metric_source": "experiments/exp1_pointcloud_degradation/ -> outputs_full/exp1_pointcloud/<condition>/results.json : summary",
+    "conditions": {
+      "baseline":  {"desc": "100% of points, no noise",            "chamfer_mean": 0.02123, "chamfer_std": 0.01296, "fscore_mean": 0.7622, "fscore_std": 0.1772},
+      "sparse_50": {"desc": "50% of points, random subsample",      "chamfer_mean": 0.02243, "chamfer_std": 0.01451, "fscore_mean": 0.7565, "fscore_std": 0.1810},
+      "sparse_25": {"desc": "25% of points, random subsample",      "chamfer_mean": 0.02340, "chamfer_std": 0.01558, "fscore_mean": 0.7429, "fscore_std": 0.1864},
+      "sparse_10": {"desc": "10% of points, random subsample",      "chamfer_mean": 0.02599, "chamfer_std": 0.01864, "fscore_mean": 0.7156, "fscore_std": 0.2041},
+      "noisy":     {"desc": "100% of points + Gaussian noise, sigma = 5% of object extent", "chamfer_mean": 0.02953, "chamfer_std": 0.01931, "fscore_mean": 0.6381, "fscore_std": 0.2312}
+    },
+    "note": "Positional noise degrades quality roughly 3x more (relative F-score drop) than even the most aggressive sparsification tested (10% of points kept)."
+  },
+  "A2_caption_conditioning": {
+    "metric_source": "experiments/exp2_caption_ablation/ -> outputs_full/exp2_caption/<condition>/results.json : summary",
+    "conditions": {
+      "original":        {"chamfer_mean": 0.02143, "chamfer_std": 0.01318, "fscore_mean": 0.7671, "fscore_std": 0.1696},
+      "wrong_category":  {"chamfer_mean": 0.02196, "chamfer_std": 0.01380, "fscore_mean": 0.7627, "fscore_std": 0.1720},
+      "no_caption":      {"chamfer_mean": 0.02176, "chamfer_std": 0.01344, "fscore_mean": 0.7568, "fscore_std": 0.1714},
+      "vague":           {"chamfer_mean": 0.02212, "chamfer_std": 0.01395, "fscore_mean": 0.7575, "fscore_std": 0.1773}
+    },
+    "note": "All four conditions fall within ~3% of each other on both metrics; even a flatly wrong category label barely moves reconstruction quality."
+  },
+  "A3_conditioning_view_count": {
+    "metric_source": "experiments/exp3_viewcount_ablation/ -> outputs_full/exp3_viewcount/results_views_{1,4,8,16}.json, aggregated from per_sample (no stored summary block, aggregated by docs/provenance.md script)",
+    "conditions": {
+      "views_1":  {"chamfer_mean": 0.0242,  "fscore_mean": 0.7366, "normals_mean": 0.780},
+      "views_4":  {"chamfer_mean": 0.02255, "fscore_mean": 0.7647, "normals_mean": 0.8018},
+      "views_8":  {"chamfer_mean": 0.02229, "fscore_mean": 0.7541, "normals_mean": 0.8015},
+      "views_16": {"chamfer_mean": 0.0222,  "fscore_mean": 0.7532, "normals_mean": 0.8101}
+    },
+    "note": "Most of the multi-view benefit is already captured at 4 views; 4 views is also the default used downstream for the mask-guided training/eval (see B)."
+  },
+  "caveat": "Single draw per condition (ShapeR's flow-matching sampler is unseeded by default and run-to-run Chamfer spread is ~23% of the mean on a per-object basis, see docs/D and docs/provenance.md). Treat small cross-condition deltas (A2's ~3% spread, A3's 8-vs-16-view gap) as within noise; A1's noisy-vs-baseline gap (~39% relative on Chamfer) and A3's 1-vs-4-view gap are large enough to likely survive that floor, but neither was repeated across seeds."
+}

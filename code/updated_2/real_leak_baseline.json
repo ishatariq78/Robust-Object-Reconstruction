@@ -1,0 +1,58 @@
+[
+  {
+    "target": "ADT1292__kitchenisland",
+    "n_on_it": 7,
+    "leak": 2.26,
+    "extra": 8.075000000000001,
+    "missing": 5.635
+  },
+  {
+    "target": "ADT1292__cuttingboard",
+    "n_on_it": 1,
+    "leak": 1.8849999999999998,
+    "extra": 21.335,
+    "missing": 1.04
+  },
+  {
+    "target": "ADT1292__tvstand",
+    "n_on_it": 2,
+    "leak": 0.855,
+    "extra": 2.6950000000000003,
+    "missing": 10.96
+  },
+  {
+    "target": "BNB1723__nightstand",
+    "n_on_it": 1,
+    "leak": 0.8099999999999999,
+    "extra": 30.78,
+    "missing": 34.175
+  },
+  {
+    "target": "ADT1292__woodentable",
+    "n_on_it": 3,
+    "leak": 0.055,
+    "extra": 3.29,
+    "missing": 0.0
+  },
+  {
+    "target": "BNB1045__sofa",
+    "n_on_it": 1,
+    "leak": 0.0,
+    "extra": 21.555,
+    "missing": 10.495000000000001
+  },
+  {
+    "target": "BNB1182__cabinet",
+    "n_on_it": 1,
+    "leak": 0.0,
+    "extra": 23.865,
+    "missing": 1.195
+  },
+  {
+    "target": "HWD0045__desktable",
+    "n_on_it": 1,
+    "leak": 0.0,
+    "extra": 12.255,
+    "missing": 15.740000000000002
+  }
+]
