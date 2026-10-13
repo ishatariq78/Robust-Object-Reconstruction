@@ -1,0 +1,37 @@
+{
+  "description": "Mask filtering using a real per-pixel depth test (not a stored/dataset depth channel -- ShapeR's pkl schema has none; depth here is rendered on the fly from the ground-truth and distractor meshes through the same cameras).",
+  "filtering_procedure": {
+    "function": "oracle_masks() in updated_2/mask_vs_leak/oracle_mask.py",
+    "method": "Render the GT target mesh's depth AND the distractor mesh's depth through the same batch cameras (augment.render_through_views). Remove mask pixels wherever the distractor is nearer the camera than the target: hit_o & (depth_o > 0) & (depth_t<=0 | depth_o<depth_t).",
+    "bug_caught_before_use": "The undefended version (target silhouette only, no depth test) covered 76-100% of the distractor's pixels, because the distractor stands in front of the target -- the 'oracle' mask would have told the model exactly where the distractor was, the opposite of its purpose.",
+    "verification": "updated_2/mask_vs_leak/verify_masks.py scores both the SAM2 mask and the depth-verified oracle mask against rendered GT silhouettes (target_hit / pot_hit / pot_share) before any downstream number is trusted."
+  },
+  "target_retention_and_distractor_removal_alt_method": {
+    "function": "masks_with_negatives() in updated_2/mask_vs_leak/clean_masks.py",
+    "method": "Non-depth alternative for comparison: split the point cloud with segment_by_support_v2, then prompt SAM2 with target points as POSITIVE clicks and intruder points as NEGATIVE clicks.",
+    "note": "This is the 'fixed' arm in the three_arms.py comparison below; distinct from the depth-verified 'oracle' arm."
+  },
+  "measured_result_depth_verified_oracle_vs_sam2": {
+    "condition": "image-mode clutter (distractor in photos only, absent from the point cloud) -- the one condition where the mask channel could possibly matter",
+    "n_object_seed_pairs": 41,
+    "source": "updated_2/mask_vs_leak/outputs/clean_test/scores.json, aggregated (see docs/provenance.md for the aggregation command)",
+    "arms": {
+      "off":    {"desc": "guidance disabled",                         "leak_pct_mean": 2.345, "extra_pct_mean": 19.947, "missing_pct_mean": 14.360},
+      "sam2":   {"desc": "today's pipeline mask (SAM2 guess)",        "leak_pct_mean": 2.023, "extra_pct_mean": 20.746, "missing_pct_mean": 11.778},
+      "oracle": {"desc": "depth-verified mask, distractor excluded by a real depth test", "leak_pct_mean": 1.913, "extra_pct_mean": 20.009, "missing_pct_mean": 11.490}
+    },
+    "figures": ["assets/figures/D_mask_verify_sam2_vs_oracle.jpg", "assets/figures/D_cleanmask_off_sam2_oracle.jpg"]
+  },
+  "measured_result_support_segmenter_fix_vs_sam2": {
+    "condition": "mixed object set, three_arms.py (control=guidance off / stock=today's mask / fixed=support-segmenter + SAM2 negative clicks)",
+    "n_object_seed_pairs": 24,
+    "source": "updated_2/mask_vs_leak/outputs/three_arms/scores.json, aggregated (see docs/provenance.md)",
+    "arms": {
+      "control": {"leak_pct_mean": 8.305, "extra_pct_mean": 17.190, "missing_pct_mean": 13.457},
+      "stock":   {"leak_pct_mean": 8.292, "extra_pct_mean": 18.049, "missing_pct_mean": 11.373},
+      "fixed":   {"leak_pct_mean": 8.146, "extra_pct_mean": 17.472, "missing_pct_mean": 10.909}
+    },
+    "figures": ["assets/figures/D_three_arms_masks.jpg", "assets/figures/D_three_arms_recon.jpg"]
+  },
+  "conclusion_and_limitation": "Even a PERFECT, ground-truth depth-verified mask only beats SAM2's own guess by ~0.11 points of Leak% (1.913 vs 2.023), far short of removing the leakage (off: 2.345). The support-segmenter fix shows the same small-and-inconclusive pattern (8.305 -> 8.292 -> 8.146). Mask ACCURACY is therefore not the bottleneck: the model's mask-conditioning channel is too weak to act decisively on an accurate mask, consistent with B's null multi-seed verdict on mask guidance in general."
+}

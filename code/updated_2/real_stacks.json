@@ -1,0 +1,122 @@
+[
+  {
+    "target": "ADT1292__coffeetable",
+    "on_it": "ADT1292__birdhousetoy",
+    "overlap": 0.9931769885168581
+  },
+  {
+    "target": "ADT1292__consoletable",
+    "on_it": "ADT1292__airpurifier",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__cuttingboard",
+    "on_it": "ADT1292__banana",
+    "overlap": 0.9401610322209032
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__banana",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__box",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__cuttingboard",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__metalbowl",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__vase_3",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__muffinpan",
+    "overlap": 0.9836406836059579
+  },
+  {
+    "target": "ADT1292__kitchenisland",
+    "on_it": "ADT1292__knife",
+    "overlap": 0.9628473226687203
+  },
+  {
+    "target": "ADT1292__metalchair",
+    "on_it": "ADT1292__donut",
+    "overlap": 0.5621326820928587
+  },
+  {
+    "target": "ADT1292__nightstand",
+    "on_it": "ADT1292__tablelamp",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__tvstand",
+    "on_it": "ADT1292__speaker",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__tvstand",
+    "on_it": "ADT1292__televisionscreen",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__woodentable",
+    "on_it": "ADT1292__bowl",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__woodentable",
+    "on_it": "ADT1292__coffeecup",
+    "overlap": 1.0
+  },
+  {
+    "target": "ADT1292__woodentable",
+    "on_it": "ADT1292__donut",
+    "overlap": 1.0
+  },
+  {
+    "target": "BNB1045__sofa",
+    "on_it": "BNB1045__decorativevase",
+    "overlap": 1.0
+  },
+  {
+    "target": "BNB1182__cabinet",
+    "on_it": "BNB1182__topiary",
+    "overlap": 1.0
+  },
+  {
+    "target": "BNB1723__nightstand",
+    "on_it": "BNB1723__bedsidelamp",
+    "overlap": 1.0
+  },
+  {
+    "target": "HWD0045__abstractpainting",
+    "on_it": "HWD0045__lightfixture",
+    "overlap": 0.6241452302109484
+  },
+  {
+    "target": "HWD0045__coffeetable",
+    "on_it": "HWD0045__iphonemobile",
+    "overlap": 1.0
+  },
+  {
+    "target": "HWD0045__coffeetable",
+    "on_it": "HWD0045__remotecontrol",
+    "overlap": 1.0
+  },
+  {
+    "target": "HWD0045__desktable",
+    "on_it": "HWD0045__macbook",
+    "overlap": 1.0
+  }
+]

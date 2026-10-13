@@ -1,0 +1,40 @@
+{
+  "description": "Mask-guided ShapeR fine-tune: held-out Extra% (predicted surface with no matching ground-truth surface nearby) before vs after adding SAM2 foreground-mask conditioning.",
+  "modification": {
+    "option_A": "Widen the DINO/ray feature extractor's mask patch-embed conv (dino_ray_extractor._mask_patch_embed[0].proj_in) from Conv2d(1,C,3) to Conv2d(2,C,3): the new input channel carries the SAM2 foreground mask alongside the existing channel.",
+    "option_B": "Add fg_bias_scale, a single learnable scalar (zero-initialised), used as an attention-bias term scaled by the foreground mask.",
+    "trainable_params": 305,
+    "backbone": "fully frozen; only option A's widened conv weights + option B's scalar are trained",
+    "source_files": ["updated_shapeR/mask_guided/architecture.py", "updated_shapeR/mask_guided/train.py"]
+  },
+  "training_config": {
+    "command_template": "python updated_shapeR/mask_guided/train.py --data_pkls <18 train pkls> --num_views 8 --epochs 20 --lr 1e-3",
+    "optimizer": "AdamW",
+    "num_views": 8,
+    "epochs": 20,
+    "lr": 1e-3,
+    "sam2_model_id": "facebook/sam2.1-hiera-base-plus",
+    "train_set": "18 diverse objects with GT meshes, NO stools (all stools held out for test)",
+    "train_set_source": "updated_shapeR/train_mask_guided.slurm",
+    "wall_time": "~22 min on the SLURM GPU partition used (1 GPU)",
+    "resulting_lambda": "fg_bias_scale converges to ~0.10"
+  },
+  "single_seed_held_out_result": {
+    "note": "First measurement, single seed, same 8-view SDPA path -- SUPERSEDED by the multi-seed verdict below, kept only for the record.",
+    "Extra_pct_baseline_vs_masked": {
+      "stool": [15.1, 9.9],
+      "graycouch": [2.1, 2.7],
+      "sofa": [20.9, 21.1],
+      "livingroomfurniture": [28.8, 55.2],
+      "wovenstool": [55.5, 55.9]
+    },
+    "mean": [24.5, 28.9]
+  },
+  "multiseed_verdict": {
+    "design": "Paired: 5 held-out objects x occlusion levels {0%, 60%} x 3 seeds = 30 paired cells, both models sharing views/masks/noise per cell",
+    "result": "Mask guidance is NOT better than vanilla ShapeR. No metric at any level has a bootstrap 95% CI excluding 0.",
+    "detail": "Single-seed hint that guided loses less surface under occlusion (Missing-% degradation +1.6 vs +3.7) did NOT survive at 3 seeds: -2.38 vs -0.36, paired diff -2.02, CI [-5.83, +1.09] -> not supported.",
+    "source": "updated_shapeR/occlusion_comparison/paired_stats.py output, job 160933 (2026-08-20); folder since superseded/rebuilt under updated_shapeR/testing/, see docs/provenance.md"
+  },
+  "depth_verified_followup": "A later, independent test (see results/D_depth_verified_masks.json) gave the fine-tune a PERFECT ground-truth mask (depth-verified, distractor excluded by construction) instead of a SAM2 guess, isolating whether the mask conditioning channel itself can use an accurate mask. It barely moved Leak% (-0.11 over SAM2's own guess) -- consistent with this section's null verdict: the bottleneck is the model's weak use of the mask channel, not mask quality."
+}

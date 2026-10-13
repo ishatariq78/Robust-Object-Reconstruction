@@ -1,0 +1,54 @@
+{
+  "description": "Three related probes: (1) image occlusion with the SLAM point cloud left intact, (2) synthetic clutter injected into images and/or the point cloud, (3) completeness vs neighbouring-object ('leakage') failure analysis and a mitigation attempt.",
+  "C1_image_occlusion_points_intact": {
+    "setup": "A grey bar/blob occluder painted into every photo (measured occlusion fraction per view); SLAM dots behind it dropped. Ground-truth mesh, cameras, crop, caption untouched. ORIGINAL ShapeR vs the mask-guided fine-tune (see B), same images/masks/seed.",
+    "source": "updated_shapeR/testing/ (augment.py synthesizes occlusion; run_test.py runs both models; compare.py renders the comparison sheet). Figure: assets/figures/C_comparison_occluded.jpg",
+    "result_multiseed": "No consistent occlusion advantage for the mask-guided model (job 160657 then superseded by the paired multi-seed run, job 160933 -- see results/B_mask_conditioning.json). Mean Chamfer 0%->60% occlusion: original 2.21->2.58, guided 2.26->2.74; the apparent smaller Missing-% degradation for guided (+1.6 vs +3.7, single seed) did not survive 3-seed replication (-2.38 vs -0.36, CI includes 0)."
+  },
+  "C2_synthetic_clutter_image_only": {
+    "setup": "A real 3D distractor object (e.g. a plant pot mesh) rendered multiview-consistently beside the target and composited into the photos ONLY -- the SLAM point cloud is untouched, so the point branch has zero knowledge the distractor exists.",
+    "source": "updated_shapeR/synthetic_distractor_benchmark/ (folder since removed from disk, see docs/provenance.md), and updated_2/clutter.py mode=\"image\"",
+    "result": "At projected areas 13-49% of the target, visible in 8/8 views, NO measurable leakage into the reconstruction under the original Extra% metric (largest vanilla_leakage +0.3 points, several negative). Once Leak% existed (see C3), this null result was partly corrected: on woodentable an image-only distractor leaves Extra% at -0.1 while Leak% rises +7.8 -- the earlier Extra%-only read was a metric artifact, not evidence of robustness."
+  },
+  "C3_synthetic_clutter_image_and_points": {
+    "setup": "clutter.py stands a real object on the target's own support surface and writes it into BOTH conditioning branches (images via multiview-consistent rendering, and the SLAM point cloud via ray-cast visibility per view). Three modes isolate which channel leaks: image (distractor in photos only), points (distractor in SLAM points only), both (both).",
+    "source": "updated_2/clutter.py, updated_2/demo_limitation.py, updated_2/metrics.py (Leak%/Extra%/Missing%/Chamfer% + paired bootstrap). Full write-up: code/updated_2/README.md. Figure: assets/figures/C_clutter_methods_stage3.png",
+    "stage1_doseresponse_mode_both_level_0.25": {
+      "design": "5 objects x 3 seeds, paired bootstrap 95% CI, 15 pairs/cell",
+      "levels": {
+        "0.15": {"dLeak": 1.2, "CI": [0.7, 1.9], "significant": true},
+        "0.25": {"dLeak": 4.2, "CI": [2.5, 5.8], "significant": true},
+        "0.40": {"dLeak": 11.8, "CI": [6.8, 17.1], "significant": true}
+      },
+      "note": "Clean monotonic dose-response; at level 0.15, dLeak is significant (+1.2) while dExtra is negative and not significant -- the standard Extra% metric points the wrong way at small intruder sizes."
+    },
+    "per_object_dLeak_at_level_0.25": {
+      "ADT1292__woodentable":  {"both": 8.3, "points": 9.2, "image": 7.8},
+      "HWD0045__desktable":    {"both": 7.3, "points": 2.5, "image": -0.1},
+      "ADT1292__coffeetable":  {"both": 4.2, "points": 2.2, "image": -0.1},
+      "ADT1292__nightstand":   {"both": 1.0, "points": 1.1, "image": 0.0},
+      "BNB1182__sidetable":    {"both": 0.1, "points": 0.1, "image": -0.3}
+    },
+    "finding": "Leakage is strongly object-dependent and tracks how well ShapeR reconstructs the object CLEAN: ranking by clean Missing% reproduces the leakage ranking exactly. Where ShapeR already fails to build the clean object (sidetable: 53.6% clean Missing%), it does not build the intruder either -- that is a different limitation (low fidelity / too few views), out of scope here, and reported separately rather than pooled."
+  },
+  "C4_completeness_and_leakage_mitigation": {
+    "selection_rule": "Pre-declared BEFORE Stage 2 ran: a cell is 'affected' if its Stage-1 dLeak >= 2.0 (depends only on the baseline model). Recovers exactly the 3 well-reconstructed objects (woodentable, coffeetable, desktable).",
+    "affected_18_paired_runs": {
+      "crop":   {"dLeak": -5.82, "CI": [-7.3, -4.3], "dMissing_damage": 0.97, "dMissing_CI": [0.4, 1.7]},
+      "gate":   {"dLeak": -3.97, "CI": [-5.3, -2.7], "dMissing_damage": 0.02},
+      "refeed": {"dLeak": -5.16, "CI": [-6.9, -3.5], "dMissing_damage": -0.01}
+    },
+    "unaffected_12_paired_runs_harm_check": {
+      "note": "On objects with no real leakage, every method still degrades the reconstruction somewhat -- the main obstacle to deployability.",
+      "crop":   {"dLeak": 0.08, "dExtra": 1.15, "dMissing": 10.06},
+      "gate":   {"dLeak": -0.12, "dExtra": 4.75, "dMissing": 0.91},
+      "refeed": {"dLeak": 0.13, "dExtra": 3.46, "dMissing": 2.91}
+    },
+    "generalization_followup_NEGATIVE": {
+      "setup": "14 fresh table-like objects, mode=both, level=0.25, 3 seeds, thresholds frozen in protocol.py BEFORE generation.",
+      "result": "refeed on these 14: dLeak -1.03, dMissing damage +5.95 -- a fifth of the leak removal and substantial new damage versus the original 5 objects (dLeak -5.16, damage -0.01). The Stage-2/3 headline does NOT generalise as stated.",
+      "gate_mechanism": "Ordering damage by point-cloud health (recall) still works -- harmful objects are the low-health ones -- but the specific threshold (0.95) tuned on the original 5 does not transfer; the true boundary on the 14 sits near 0.984, and that number must NOT be adopted without a third, independent confirmation set.",
+      "source": "code/updated_2/confirm/RESULT.md (2026-08-27)"
+    }
+  }
+}
